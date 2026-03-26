@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fit App - Handebol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased">
+    
+    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg">
+        
+        <header class="bg-black text-white p-8 rounded-b-3xl shadow-md text-center">
+            <h1 class="text-4xl font-extrabold text-yellow-400 tracking-tight">Fit App</h1>
+            <p class="text-sm mt-2 text-gray-300">Preparação Física - Handebol</p>
+        </header>
+
+        <main class="p-6 mt-6">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-700">Escolha seu Treino</h2>
+            
+            <div class="flex flex-col gap-4">
+                {% for treino in treinos %}
+    
+                    {% if treino == 'Alongamento' %}
+                    <a href="/treino/{{ treino }}" class="block w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
+                        🧘‍♂️ {{ treino }}
+                    </a>
+                    
+                    {% elif treino == 'Preventivo' or treino == 'Mobilidade' %}
+                    <a href="/treino/{{ treino }}" class="block w-full bg-green-400 hover:bg-green-500 active:bg-green-600 text-black font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
+                        🛡️ {{ treino }}
+                    </a>
+                    
+                    {% else %}
+                    <a href="/treino/{{ treino }}" class="block w-full bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-black font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
+                        🏋️‍♂️ {{ treino }}
+                    </a>
+                    {% endif %}
+                    
+                {% endfor %}
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <a href="https://docs.google.com/spreadsheets/d/1WyqIrrm4PslwT646C4m-qoEWe5IKn89S/edit?gid=938345488#gid=938345488" target="_blank" class="block w-full bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold text-base py-4 px-6 rounded-2xl shadow-sm text-center transition active:scale-95 flex items-center justify-center gap-2 border border-blue-200">
+                    📊 Abrir Planilha
+                </a>
+            </div>
+        </main>
+
+    </div>
+
+</body>
+</html>

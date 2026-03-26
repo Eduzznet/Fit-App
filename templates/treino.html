@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ nome_treino }} - Fit App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased pb-10">
+
+    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg relative">
+        
+        <header class="bg-black text-white p-6 rounded-b-3xl shadow-md flex items-center justify-between">
+            <a href="javascript:history.back()" class="text-yellow-400 font-bold text-sm bg-gray-800 px-3 py-2 rounded-lg hover:bg-gray-700">
+                ⬅ Voltar
+            </a>
+            <h1 class="text-2xl font-extrabold text-yellow-400 tracking-tight truncate ml-4">{{ nome_treino }}</h1>
+        </header>
+
+        <main class="p-4 mt-2">
+            <div class="flex flex-col gap-4" id="lista-treino">
+                {% for bloco in blocos %}
+                    {% set b_idx = loop.index %}
+                    
+                    {% if bloco.tipo == 'titulo' %}
+                        <div class="mt-6 mb-1 border-b-2 border-gray-800 pb-2">
+                            <h2 class="text-xl font-black text-gray-800 uppercase tracking-widest">{{ bloco.texto }}</h2>
+                        </div>
+                    
+                    {% elif bloco.tipo == 'simples' %}
+                        {% for ex in bloco.exercicios %}
+                        {% set e_idx = loop.index %}
+                        <div class="bg-transparent border border-gray-300 p-4 rounded-xl shadow-sm">
+                            
+                            <h3 class="font-bold text-lg text-gray-800">
+                                {% if ex.get('video') %}
+                                    <a href="{{ ex.video }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline decoration-blue-300 decoration-2 underline-offset-2 flex items-center gap-1">
+                                        ▶️ {{ ex.nome }}
+                                    </a>
+                                {% else %}
+                                    {{ ex.nome }}
+                                {% endif %}
+                            </h3>
+                            
+                            <div class="flex justify-between items-center mt-3 mb-4">
+                                <div class="flex gap-2">
+                                    <span class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded tracking-wide">
+                                        SÉRIES: <span class="text-gray-800 text-sm">{{ ex.series }}</span>
+                                    </span>
+                                    <span class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded tracking-wide">
+                                        REPS: <span class="text-gray-800 text-sm">{{ ex.reps }}</span>
+                                    </span>
+                                </div>
+                                
+                                <div class="flex items-center gap-2">
+                                    <button class="bg-gray-200 text-gray-600 font-bold w-10 h-10 rounded-lg shadow-sm active:scale-95 transition flex items-center justify-center text-xl" 
+                                            onclick="desfazerSerie(this.nextElementSibling)">-</button>
+                                    <button class="btn-exercicio bg-yellow-400 text-black font-bold py-2 px-4 rounded-lg shadow active:scale-95 transition min-w-[80px]" 
+                                            data-feitas="0" 
+                                            data-total="{{ ex.series }}" 
+                                            onclick="registrarSerie(this)">
+                                        0/{{ ex.series }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 border-t border-gray-200 pt-3 flex gap-2">
+                                {% if ex.get('usa_carga', True) %}
+                                <div class="flex w-2/5 shadow-sm rounded">
+                                    <input type="number" inputmode="numeric" min="0" oninput="if(this.value < 0) this.value = 0;" placeholder="Carga" 
+                                           class="input-salvavel w-2/3 bg-white border border-gray-300 border-r-0 text-gray-700 text-sm rounded-l focus:ring-yellow-500 focus:border-yellow-500 p-2 text-center"
+                                           data-b="{{ b_idx }}" data-e="{{ e_idx }}" data-tipo="carga" onchange="salvarTexto(this)">
+                                    
+                                    <select class="input-salvavel w-1/3 bg-gray-100 border border-gray-300 text-gray-700 text-xs rounded-r focus:ring-yellow-500 focus:border-yellow-500 text-center px-0 appearance-none"
+                                            data-b="{{ b_idx }}" data-e="{{ e_idx }}" data-tipo="unidade" onchange="salvarTexto(this)">
+                                        <option value="kg">kg</option>
+                                        <option value="lbs">lbs</option>
+                                    </select>
+                                </div>
+                                <input type="text" placeholder="Observações..." 
+                                       class="input-salvavel w-3/5 bg-white border border-gray-300 text-gray-700 text-sm rounded shadow-sm focus:ring-yellow-500 focus:border-yellow-500 p-2"
+                                       data-b="{{ b_idx }}" data-e="{{ e_idx }}" data-tipo="obs" onchange="salvarTexto(this)">
+                                {% else %}
+                                <input type="text" placeholder="Observações..." 
+                                       class="input-salvavel w-full bg-white border border-gray-300 text-gray-700 text-sm rounded shadow-sm focus:ring-yellow-500 focus:border-yellow-500 p-2"
+                                       data-b="{{ b_idx }}" data-e="{{ e_idx }}" data-tipo="obs" onchange="salvarTexto(this)">
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    
+                    {% else %}
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-xl shadow-sm">
+                            <div class="mb-3 flex justify-between items-center">
+                                <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">⚡ Conjugado • {{ bloco.series }} SÉRIES</span>
+                            </div>
+                            
+                            <div class="flex flex-col gap-4">
+                                {% for ex in bloco.exercicios %}
+                                {% set e_idx = loop.index %}
+                                    <div class="border-b border-yellow-200 pb-3 mt-3 last:border-0 last:pb-0">
+                                        
+                                        {% if ex.get('is_alternativo') %}
+                                            <div class="bg-white p-2 rounded shadow-sm border border-yellow-300 mb-2">
+                                                <div class="text-[10px] font-bold text-yellow-600 uppercase mb-2 text-center">🔄 Escolha 1 opção abaixo:</div>
+                                                {% for opcao in ex.opcoes %}
+                                                    <div class="flex justify-between items-center my-1">
+                                                        <h3 class="font-semibold text-gray-800 text-sm w-2/3">
+                                                            {% if opcao.get('video') %}
+                                                                <a href="{{ opcao.video }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline decoration-blue-300 decoration-2 underline-offset-2 flex items-center gap-1">
+                                                                    ▶️ {{ opcao.nome }}
+                                                                </a>
+                                                            {% else %}
+                                                                {{ opcao.nome }}
+                                                            {% endif %}
+                                                        </h3>
+                                                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded border border-gray-200 shadow-sm">
+                                                            REPS: <span class="text-gray-800 text-sm">{{ opcao.reps }}</span>
+                                                        </span>
+                                                    </div>
+                                                    {% if not loop.last %}
+                                                        <div class="text-center text-xs font-black text-yellow-400 my-1">OU</div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="font-semibold text-gray-800 text-sm w-2/3">
+                                                    {% if ex.get('video') %}
+                                                        <a href="{{ ex.video }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline decoration-blue-300 decoration-2 underline-offset-2 flex items-center gap-1">
+                                                            ▶️ {{ ex.nome }}
+                                                        </a>
+                                                    {% else %}
+                                                        {{ ex.nome }}
+                                                    {% endif %}
+                                                </h3>
+                                                <span class="text-xs font-bold text-gray-500 bg-white px-2 py-1 rounded shadow-sm border border-yellow-200">
+                                                    REPS: <span class="text-gray-800 text-sm">{{ ex.reps }}</span>
+                                                </span>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="flex gap-2">
+                                            {% if ex.get('usa_carga', True) %}
+                                            <div class="flex w-2/5 shadow-sm rounded">
+                                                <input type="number" inputmode="numeric" min="0" oninput="if(this.value < 0) this.value = 0;" placeholder="Carga" 
+                                                       class="input-salvavel w-2/3 bg-white border border-yellow-300 border-r-0 text-gray-700 text-sm rounded-l focus:ring-yellow-500 focus:border-yellow-500 p-1.5 text-center"
+                                                       data-b="{{ b_idx }}" data-e="{{ e_idx }}" data-tipo="carga" onchange="salvarTexto(this)">
+                                                
+                                                <select class="input-salvavel w-1/3 bg-yellow-100 border border-yellow-300 text-gray-700 text-xs rounded-r focus:ring-yellow-500 focus:border-yellow-500 text-center px-0 appearance-none"
+                                                        data-b="{{ b_idx }}" data-e="{{ e_idx }}" data-tipo="unidade" onchange="salvarTexto(this)">
+                                                    <option value="kg">kg</option>
+                                                    <option value="lbs">lbs</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" placeholder="Observações..." 
+                                                   class="input-salvavel w-3/5 bg-white border border-yellow-300 text-gray-700 text-sm rounded shadow-sm focus:ring-yellow-500 focus:border-yellow-500 p-1.5"
+                                                   data-b="{{ b_idx }}" data-e="{{ e_idx }}" data-tipo="obs" onchange="salvarTexto(this)">
+                                            {% else %}
+                                            <input type="text" placeholder="Observações..." 
+                                                   class="input-salvavel w-full bg-white border border-yellow-300 text-gray-700 text-sm rounded shadow-sm focus:ring-yellow-500 focus:border-yellow-500 p-1.5"
+                                                   data-b="{{ b_idx }}" data-e="{{ e_idx }}" data-tipo="obs" onchange="salvarTexto(this)">
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mt-4 flex justify-end items-center gap-2">
+                                <button class="bg-gray-200 text-gray-600 font-bold w-10 h-10 rounded-lg shadow-sm active:scale-95 transition flex items-center justify-center text-xl" 
+                                        onclick="desfazerSerie(this.nextElementSibling)">-</button>
+                                <button class="btn-exercicio bg-yellow-400 text-black font-bold py-2 px-4 rounded-lg shadow active:scale-95 transition min-w-[80px]" 
+                                        data-feitas="0" 
+                                        data-total="{{ bloco.series }}" 
+                                        onclick="registrarSerie(this)">
+                                    0/{{ bloco.series }}
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div id="mensagem-final" class="hidden mt-8 text-center bg-green-100 border-2 border-green-500 p-6 rounded-2xl shadow-md">
+                <h2 class="text-2xl font-bold text-green-700 mb-2">🎉 Treino Concluído!</h2>
+                <p class="text-green-600 mb-6 font-medium">Excelente trabalho hoje.</p>
+                <button onclick="resetarTreino()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-lg py-3 rounded-xl shadow transition active:scale-95">
+                    Zerar séries para o próximo treino
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const nomeTreino = "{{ nome_treino }}"; 
+        const botoes = document.querySelectorAll('.btn-exercicio');
+
+        window.onload = function() {
+            botoes.forEach(function(botao, index) {
+                let chave = `fitapp-${nomeTreino}-btn-${index}`;
+                let salvas = localStorage.getItem(chave);
+                
+                if (salvas !== null) {
+                    let feitas = parseInt(salvas);
+                    let total = parseInt(botao.getAttribute('data-total'));
+                    botao.setAttribute('data-feitas', feitas);
+                    
+                    if (feitas >= total) {
+                        botao.innerText = "Feito ✓";
+                        botao.classList.remove('bg-yellow-400', 'text-black');
+                        botao.classList.add('bg-green-500', 'text-white');
+                        botao.disabled = true;
+                    } else {
+                        botao.innerText = feitas + "/" + total;
+                    }
+                }
+            });
+
+            document.querySelectorAll('.input-salvavel').forEach(function(input) {
+                let b_idx = input.getAttribute('data-b');
+                let e_idx = input.getAttribute('data-e');
+                let tipo = input.getAttribute('data-tipo');
+                let chave = `fitapp-${nomeTreino}-${tipo}-${b_idx}-${e_idx}`;
+                
+                let textoSalvo = localStorage.getItem(chave);
+                if (textoSalvo !== null) {
+                    input.value = textoSalvo;
+                }
+            });
+
+            verificarTreinoCompleto();
+        };
+
+        function salvarTexto(input) {
+            let b_idx = input.getAttribute('data-b');
+            let e_idx = input.getAttribute('data-e');
+            let tipo = input.getAttribute('data-tipo');
+            let chave = `fitapp-${nomeTreino}-${tipo}-${b_idx}-${e_idx}`;
+            localStorage.setItem(chave, input.value);
+        }
+
+        function registrarSerie(botao) {
+            let feitas = parseInt(botao.getAttribute('data-feitas'));
+            let total = parseInt(botao.getAttribute('data-total'));
+            let index = Array.from(botoes).indexOf(botao);
+            let chave = `fitapp-${nomeTreino}-btn-${index}`;
+
+            if (feitas < total) {
+                feitas++;
+                botao.setAttribute('data-feitas', feitas);
+                localStorage.setItem(chave, feitas); 
+                
+                if (feitas < total) {
+                    botao.innerText = feitas + "/" + total;
+                } else {
+                    botao.innerText = "Feito ✓";
+                    botao.classList.remove('bg-yellow-400', 'text-black');
+                    botao.classList.add('bg-green-500', 'text-white');
+                    botao.disabled = true;
+                }
+            }
+            verificarTreinoCompleto();
+        }
+
+        // NOVO: FUNÇÃO PARA DESFAZER O CLIQUE
+        function desfazerSerie(botaoPrincipal) {
+            let feitas = parseInt(botaoPrincipal.getAttribute('data-feitas'));
+            let total = parseInt(botaoPrincipal.getAttribute('data-total'));
+            let index = Array.from(botoes).indexOf(botaoPrincipal);
+            let chave = `fitapp-${nomeTreino}-btn-${index}`;
+
+            if (feitas > 0) {
+                feitas--;
+                botaoPrincipal.setAttribute('data-feitas', feitas);
+                localStorage.setItem(chave, feitas); 
+
+                // Devolve a cor e o texto original
+                botaoPrincipal.innerText = feitas + "/" + total;
+                botaoPrincipal.classList.remove('bg-green-500', 'text-white');
+                botaoPrincipal.classList.add('bg-yellow-400', 'text-black');
+                botaoPrincipal.disabled = false;
+                
+                // Esconde a mensagem final, pois o treino não está mais completo
+                document.getElementById('mensagem-final').classList.add('hidden');
+            }
+        }
+
+        function verificarTreinoCompleto() {
+            let tudoConcluido = true;
+            botoes.forEach(function(botao) {
+                let feitas = parseInt(botao.getAttribute('data-feitas'));
+                let total = parseInt(botao.getAttribute('data-total'));
+                if (feitas < total) {
+                    tudoConcluido = false;
+                }
+            });
+
+            if (tudoConcluido && botoes.length > 0) {
+                document.getElementById('mensagem-final').classList.remove('hidden');
+            }
+        }
+
+        function resetarTreino() {
+            botoes.forEach(function(botao, index) {
+                let chave = `fitapp-${nomeTreino}-btn-${index}`;
+                localStorage.removeItem(chave); 
+
+                botao.setAttribute('data-feitas', '0');
+                let total = botao.getAttribute('data-total');
+                botao.innerText = "0/" + total;
+                botao.classList.remove('bg-green-500', 'text-white');
+                botao.classList.add('bg-yellow-400', 'text-black');
+                botao.disabled = false;
+            });
+
+            document.getElementById('mensagem-final').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

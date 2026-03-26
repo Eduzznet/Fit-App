@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ categoria }} - Fit App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased">
+    
+    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg">
+        
+        <header class="bg-black text-white p-6 rounded-b-3xl shadow-md flex items-center justify-between">
+            <a href="/" class="text-yellow-400 font-bold text-sm bg-gray-800 px-3 py-2 rounded-lg hover:bg-gray-700">
+                ⬅ Voltar
+            </a>
+            <h1 class="text-2xl font-extrabold text-yellow-400 tracking-tight truncate ml-4">{{ categoria }}</h1>
+        </header>
+
+        <main class="p-6 mt-6">
+            <h2 class="text-xl font-bold mb-6 text-center text-gray-700">Selecione o treino:</h2>
+            
+            <div class="flex flex-col gap-4">
+                {% for sub in subtreinos %}
+                <a href="/treino/{{ categoria }}/{{ sub }}" class="block w-full bg-gray-100 border-2 border-gray-300 hover:bg-gray-200 hover:border-gray-400 text-gray-800 font-bold text-lg py-5 px-6 rounded-2xl shadow-sm text-center transition transform active:scale-95">
+                    {{ sub }}
+                </a>
+                {% endfor %}
+            </div>
+        </main>
+
+    </div>
+
+</body>
+</html>
