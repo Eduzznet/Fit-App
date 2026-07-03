@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!--
+      TEMPLATE: submenu.html
+      Atua como uma camada intermediária de navegação (Ex: Categoria "Academia" > "Treino A").
+      Serve para organizar a UI quando uma categoria possui subdivisões, evitando telas iniciais muito poluídas.
+    -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ categoria }} - Fit App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
+        // Inicializa o modo escuro compartilhando a mesma lógica da página raiz.
         tailwind.config = { darkMode: 'class' }
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark')
@@ -23,19 +29,20 @@
     
     <div class="max-w-md mx-auto bg-white dark:bg-gray-800 min-h-screen shadow-lg transition-colors duration-300">
         
+        <!-- CABEÇALHO RESPONSIVO -->
+        <!-- O container Flexbox é estruturado para garantir que botões laterais (Voltar e Tema) 
+             não sofram "esmagamento" ('flex-shrink-0') por títulos extensos, permitindo quebra de linha ('leading-snug') -->
         <header class="bg-black text-white p-5 rounded-b-3xl shadow-md flex items-center justify-between border-b border-transparent dark:border-gray-700">
             
-            <!-- Botão de Voltar blindado contra quebras de linha -->
+            <!-- Link de retorno blindado que preserva o contexto do mês na URL -->
             <a href="/?mes={{ mes }}" class="flex-shrink-0 flex items-center justify-center text-yellow-400 font-bold text-sm bg-gray-800 dark:bg-gray-700 px-3 py-2 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap">
                 ⬅ Voltar
             </a>
             
-            <!-- Título centralizado com limite de espaço -->
             <h1 class="flex-1 text-lg font-extrabold text-yellow-400 tracking-tight mx-3 text-center leading-snug">
                 {{ categoria }}
             </h1>
             
-            <!-- Botão de tema alinhado junto ao flexbox -->
             <button onclick="toggleTheme()" class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 w-10 h-10 rounded-full shadow active:scale-95 transition flex items-center justify-center text-lg">
                 🌓
             </button>
@@ -45,7 +52,9 @@
         <main class="p-6 mt-6">
             <h2 class="text-xl font-bold mb-6 text-center text-gray-700 dark:text-gray-200">Selecione o treino:</h2>
             
+            <!-- LISTAGEM DE SUBTREINOS DINÂMICA -->
             <div class="flex flex-col gap-4">
+                <!-- Itera sobre as subdivisões identificadas pelo motor Python e monta as URLs completas -->
                 {% for sub in subtreinos %}
                 <a href="/treino/{{ mes }}/{{ categoria }}/{{ sub }}" class="block w-full bg-gray-100 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-bold text-lg py-5 px-6 rounded-2xl shadow-sm text-center transition transform active:scale-95">
                     {{ sub }}

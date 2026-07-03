@@ -1,24 +1,37 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!--
+      TEMPLATE: index.html
+      Responsável pela página inicial do aplicativo.
+      Gerencia a seleção do ciclo ativo (planilha do mês) e renderiza as categorias principais.
+    -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fit App - Handebol</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
-        // 1. LÓGICA DE LEMBRAR O MÊS
+        // ==========================================
+        // 1. LÓGICA DE PERSISTÊNCIA DE SESSÃO
+        // ==========================================
         const urlParams = new URLSearchParams(window.location.search);
         const mesParam = urlParams.get('mes');
         const mesSalvo = localStorage.getItem('fitapp_ultimo_mes');
 
-        // Se acessou o site raiz (sem ?mes=) e o celular tem um mês salvo, redireciona rápido!
+        // Redirecionamento Inteligente: Se o usuário acessar a URL raiz limpa ('/')
+        // e já tiver um histórico salvo no dispositivo, o redirecionamos instantaneamente
+        // para a planilha correta, melhorando a UX e reduzindo cliques.
         if (!mesParam && mesSalvo) {
             window.location.replace('/?mes=' + mesSalvo);
         }
 
-        // 2. LÓGICA DO MODO ESCURO
+        // ==========================================
+        // 2. GERENCIAMENTO DE TEMA (DARK MODE)
+        // ==========================================
         tailwind.config = { darkMode: 'class' }
+        
+        // Inicializa o tema checando o cache local. Fallback para a preferência do sistema operacional.
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark')
         } else {
@@ -26,37 +39,40 @@
         }
         
         function toggleTheme() {
+            // Alterna a classe global no HTML e persiste a escolha no dispositivo
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
         }
     </script>
 </head>
+<!-- Transições suaves de cor (transition-colors) evitam flashes agressivos ao trocar o tema -->
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans antialiased transition-colors duration-300">
     
     <div class="max-w-md mx-auto bg-white dark:bg-gray-800 min-h-screen shadow-lg transition-colors duration-300">
         
-        <!-- Cabeçalho com o botão de alternar -->
+        <!-- CABEÇALHO DO APP -->
         <header class="bg-black text-white p-8 rounded-b-3xl shadow-md text-center relative border-b border-transparent dark:border-gray-700 transition-colors duration-300">
-            
             <button onclick="toggleTheme()" class="absolute top-4 right-4 bg-gray-800 hover:bg-gray-700 p-2 rounded-full shadow active:scale-95 transition text-xl">
                 🌓
             </button>
-            
             <h1 class="text-4xl font-extrabold text-yellow-400 tracking-tight">Fit App</h1>
             <p class="text-sm mt-2 text-gray-300">Preparação Física - Handebol</p>
         </header>
 
         <main class="p-6 mt-6">
             
-            <!-- SELETOR DE MÊS -->
+            <!-- SELETOR DE PLANILHAS (MESES) -->
             <div class="mb-8 bg-gray-50 dark:bg-gray-700 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600">
                 <label for="mes-select" class="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-2 uppercase tracking-wide text-center">Planilha Ativa:</label>
                 <div class="relative">
+                    <!-- O evento 'onchange' garante que a escolha seja salva no LocalStorage imediatamente antes de forçar o recarregamento da página -->
                     <select id="mes-select" onchange="localStorage.setItem('fitapp_ultimo_mes', this.value); window.location.href='/?mes=' + this.value" class="block w-full appearance-none bg-white dark:bg-gray-800 border-2 border-yellow-400 dark:border-yellow-500 text-gray-800 dark:text-gray-100 font-bold py-3 px-4 pr-8 rounded-xl leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 text-center text-lg shadow-sm">
+                        <!-- Popula os meses disponíveis injetados pelo Python via Jinja -->
                         {% for m in lista_meses %}
                             <option value="{{ m }}" {% if m == mes_atual %}selected{% endif %}>{{ m }}</option>
                         {% endfor %}
                     </select>
+                    <!-- Ícone customizado da seta de Dropdown -->
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-yellow-500">
                         <svg class="fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                     </div>
@@ -65,9 +81,12 @@
 
             <h2 class="text-xl font-bold mb-6 text-center text-gray-700 dark:text-gray-200">Escolha seu Treino</h2>
             
+            <!-- RENDERIZAÇÃO DINÂMICA DAS CATEGORIAS DE TREINO -->
             <div class="flex flex-col gap-4">
                 {% for treino in treinos %}
-                    <!-- A URL leva o "mes_atual" -->
+    
+                    <!-- Formatação Condicional de UI: Aplica cores e ícones distintos baseados no tipo de treino 
+                         para facilitar o reconhecimento visual rápido pelo usuário -->
                     {% if treino == 'Alongamento' %}
                     <a href="/treino/{{ mes_atual }}/{{ treino }}" class="block w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
                         🧘‍♂️ {{ treino }}
@@ -87,9 +106,10 @@
                 {% endfor %}
             </div>
 
+            <!-- BOTÃO EXTERNO PARA A PLANILHA DO GOOGLE SHEETS -->
             <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <a href="https://docs.google.com/spreadsheets/d/1WyqIrrm4PslwT646C4m-qoEWe5IKn89S/edit?gid=938345488#gid=938345488" target="_blank" class="block w-full bg-blue-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-gray-600 text-blue-700 dark:text-blue-400 font-bold text-base py-4 px-6 rounded-2xl shadow-sm text-center transition active:scale-95 flex items-center justify-center gap-2 border border-blue-200 dark:border-gray-600">
-                    📊 Abrir Planilha
+                    📊 Abrir Planilha Oficial
                 </a>
             </div>
         </main>

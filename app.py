@@ -3,17 +3,20 @@ from treinos import treinos_fixos, meses
 
 app = Flask(__name__)
 
-# ROTA INICIAL (Recebe o mês selecionado)
 @app.route('/')
 def index():
-    # Pega o mês da URL (ex: /?mes=Abril 2026). Se não tiver, usa o primeiro da lista.
+    """
+    Ponto de entrada do aplicativo. 
+    Lida com a seleção de planilhas mensais e mescla os treinos disponíveis.
+    """
     lista_meses = list(meses.keys())
     mes_atual = request.args.get('mes')
     
+    # Se o usuário acessar a raiz sem parâmetros, servimos a planilha mais recente.
     if mes_atual not in lista_meses:
-        mes_atual = lista_meses[-1] # Padrão: exibe o mês mais novo/ultimo da lista
+        mes_atual = lista_meses[-1] 
 
-    # Junta os treinos daquele mês com os treinos fixos
+    # Mescla as rotinas específicas do mês ativo com o banco de treinos atemporais (preventivos, etc)
     treinos_do_mes = list(meses[mes_atual].keys())
     treinos_gerais = list(treinos_fixos.keys())
     
@@ -24,29 +27,32 @@ def index():
                            mes_atual=mes_atual, 
                            lista_meses=lista_meses)
 
-# ROTA DO TREINO (Inclui o mês na URL)
 @app.route('/treino/<mes>/<nome>')
 def abrir_treino_ou_pasta(mes, nome):
-    # Primeiro procura se é um treino específico do mês
+    """
+    Roteador dinâmico. Decide se o usuário clicou em uma ficha de treino direta
+    ou em uma categoria que exige a abertura de um submenu.
+    """
+    # Ordem de resolução: busca primeiro nas planilhas mensais, depois nos treinos fixos
     if nome in meses.get(mes, {}):
         conteudo = meses[mes][nome]
-    # Se não for, procura se é um treino fixo (Preventivo, etc)
     elif nome in treinos_fixos:
         conteudo = treinos_fixos[nome]
     else:
         return "Treino não encontrado", 404
     
-    # Checa se é dicionário (Submenu) ou Lista (Treino direto)
+    # Identifica a estrutura de dados: dict = pasta com mais opções; list = ficha de exercícios
     if isinstance(conteudo, dict):
         nomes_subtreinos = list(conteudo.keys())
         return render_template('submenu.html', mes=mes, categoria=nome, subtreinos=nomes_subtreinos)
     else:
         return render_template('treino.html', mes=mes, nome_treino=nome, blocos=conteudo)
 
-# ROTA DA SUBPASTA (Agora inclui o mês na URL)
 @app.route('/treino/<mes>/<categoria>/<subtreino>')
 def abrir_subtreino(mes, categoria, subtreino):
-    # Lógica igual: procura nos fixos primeiro, depois no mês
+    """
+    Carrega a ficha de treino final a partir de um submenu.
+    """
     if categoria in treinos_fixos:
         blocos = treinos_fixos[categoria][subtreino]
     else:

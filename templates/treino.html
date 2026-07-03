@@ -214,11 +214,15 @@
     </div>
 
     <script>
+        // Variáveis de escopo global injetadas pelo Jinja (Back-end)
         const nomeTreino = "{{ nome_treino }}"; 
         const mesAtivo = "{{ mes }}"; 
         const botoes = document.querySelectorAll('.btn-exercicio');
 
         window.onload = function() {
+            // Inicializa o estado da tela buscando os dados persistidos no LocalStorage do dispositivo.
+            // A chave utiliza o formato `fitapp-{mes}-{treino}-...` para evitar colisões entre planilhas.
+            
             botoes.forEach(function(botao, index) {
                 let chave = `fitapp-${mesAtivo}-${nomeTreino}-btn-${index}`;
                 let salvas = localStorage.getItem(chave);
@@ -229,16 +233,14 @@
                     botao.setAttribute('data-feitas', feitas);
                     
                     if (feitas >= total) {
-                        botao.innerText = "Feito ✓";
-                        botao.classList.remove('bg-yellow-400', 'text-black', 'dark:bg-yellow-500');
-                        botao.classList.add('bg-green-500', 'text-white');
-                        botao.disabled = true;
+                        marcarBotaoConcluido(botao);
                     } else {
                         botao.innerText = feitas + "/" + total;
                     }
                 }
             });
 
+            // Restaura as anotações de carga e observações de texto digitadas pelo usuário
             document.querySelectorAll('.input-salvavel').forEach(function(input) {
                 let b_idx = input.getAttribute('data-b');
                 let e_idx = input.getAttribute('data-e');
@@ -255,6 +257,7 @@
         };
 
         function salvarTexto(input) {
+            // Persiste entradas de texto no momento em que o usuário tira o foco do campo (onchange)
             let b_idx = input.getAttribute('data-b');
             let e_idx = input.getAttribute('data-e');
             let tipo = input.getAttribute('data-tipo');
@@ -263,6 +266,7 @@
         }
 
         function registrarSerie(botao) {
+            // Incrementa o contador de séries. Se atingir o limite, bloqueia o botão visualmente.
             let feitas = parseInt(botao.getAttribute('data-feitas'));
             let total = parseInt(botao.getAttribute('data-total'));
             let index = Array.from(botoes).indexOf(botao);
@@ -276,16 +280,14 @@
                 if (feitas < total) {
                     botao.innerText = feitas + "/" + total;
                 } else {
-                    botao.innerText = "Feito ✓";
-                    botao.classList.remove('bg-yellow-400', 'text-black', 'dark:bg-yellow-500');
-                    botao.classList.add('bg-green-500', 'text-white');
-                    botao.disabled = true;
+                    marcarBotaoConcluido(botao);
                 }
             }
             verificarTreinoCompleto();
         }
 
         function desfazerSerie(botaoPrincipal) {
+            // Reverte um clique acidental, retornando as classes CSS ao estado original.
             let feitas = parseInt(botaoPrincipal.getAttribute('data-feitas'));
             let total = parseInt(botaoPrincipal.getAttribute('data-total'));
             let index = Array.from(botoes).indexOf(botaoPrincipal);
@@ -305,7 +307,16 @@
             }
         }
 
+        function marcarBotaoConcluido(botao) {
+            // Helper function para encapsular a mudança visual de um botão concluído
+            botao.innerText = "Feito ✓";
+            botao.classList.remove('bg-yellow-400', 'text-black', 'dark:bg-yellow-500');
+            botao.classList.add('bg-green-500', 'text-white');
+            botao.disabled = true;
+        }
+
         function verificarTreinoCompleto() {
+            // Varre o DOM para verificar se todos os exercícios do treino atualizaram seu status para completo
             let tudoConcluido = true;
             botoes.forEach(function(botao) {
                 let feitas = parseInt(botao.getAttribute('data-feitas'));
@@ -321,6 +332,8 @@
         }
 
         function resetarTreino() {
+            // Limpa o cache do navegador especificamente para as séries deste treino
+            // Mantém os dados de carga intactos para o usuário não precisar digitar os pesos novamente
             botoes.forEach(function(botao, index) {
                 let chave = `fitapp-${mesAtivo}-${nomeTreino}-btn-${index}`;
                 localStorage.removeItem(chave); 

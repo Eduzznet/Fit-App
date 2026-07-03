@@ -1,4 +1,14 @@
-# treinos.py
+"""
+Módulo de Dados (treinos.py)
+Atua como um banco de dados estático em memória para o aplicativo.
+A estrutura é dividida em dados atemporais (treinos_fixos) e dados sazonais (meses).
+"""
+
+# ==========================================
+# TREINOS FIXOS
+# Rotinas de base que raramente sofrem alterações entre os ciclos.
+# Mantidos isolados para evitar redundância de dados nas planilhas mensais.
+# ==========================================
 
 treinos_fixos = {
     "Mobilidade": {
@@ -166,7 +176,10 @@ treinos_fixos = {
     ]
 }
 
-# --- AQUI ESTAVA O PROBLEMA: ADICIONEI A CHAVE "Março 2026" ---
+# ==========================================
+# PLANILHAS MENSAIS (SAZONAIS)
+# Rotinas ativas que mudam a cada novo ciclo de preparação física.
+# ==========================================
 meses = {
     "Março 2026": {
         "Treino A": [
@@ -590,7 +603,7 @@ meses = {
             ]
         }
     },
-    
+
     "Maio 2026": {
         "Academia": {
             "Treino A": [
