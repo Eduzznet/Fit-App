@@ -81,6 +81,7 @@ Bash
 python app.py
 Acesse no navegador:
 Abra http://127.0.0.1:5000
+```
 
 🎯 Motivação e Aprendizado
 Este projeto foi desenvolvido com o propósito de unir o estudo prático de Engenharia de Software com a rotina esportiva universitária. O desafio principal foi criar uma arquitetura que permitisse a adição mensal de novas planilhas de forma escalável (sem precisar criar novas páginas HTML), focando forte na Experiência do Usuário (UX) de atletas que precisam de um app rápido, simples e que lembre o seu progresso automaticamente sem a necessidade de criar sistemas complexos de login/senha em banco de dados para a equipe.
