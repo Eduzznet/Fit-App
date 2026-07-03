@@ -6,27 +6,28 @@
     <title>Fit App - Handebol</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- SCRIPT DO TEMA (Modo Claro/Escuro) -->
     <script>
-        tailwind.config = {
-            darkMode: 'class',
+        // 1. LÓGICA DE LEMBRAR O MÊS
+        const urlParams = new URLSearchParams(window.location.search);
+        const mesParam = urlParams.get('mes');
+        const mesSalvo = localStorage.getItem('fitapp_ultimo_mes');
+
+        // Se acessou o site raiz (sem ?mes=) e o celular tem um mês salvo, redireciona rápido!
+        if (!mesParam && mesSalvo) {
+            window.location.replace('/?mes=' + mesSalvo);
         }
-        
-        // Verifica o tema salvo antes de carregar a tela (evita aquele "piscar" branco)
+
+        // 2. LÓGICA DO MODO ESCURO
+        tailwind.config = { darkMode: 'class' }
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark')
         } else {
             document.documentElement.classList.remove('dark')
         }
         
-        // Função do botão que alterna as cores
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
-            if (document.documentElement.classList.contains('dark')) {
-                localStorage.setItem('theme', 'dark');
-            } else {
-                localStorage.setItem('theme', 'light');
-            }
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
         }
     </script>
 </head>
@@ -46,23 +47,39 @@
         </header>
 
         <main class="p-6 mt-6">
-            <h2 class="text-2xl font-bold mb-6 text-center text-gray-700 dark:text-gray-200">Escolha seu Treino</h2>
+            
+            <!-- SELETOR DE MÊS -->
+            <div class="mb-8 bg-gray-50 dark:bg-gray-700 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-600">
+                <label for="mes-select" class="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-2 uppercase tracking-wide text-center">Planilha Ativa:</label>
+                <div class="relative">
+                    <select id="mes-select" onchange="localStorage.setItem('fitapp_ultimo_mes', this.value); window.location.href='/?mes=' + this.value" class="block w-full appearance-none bg-white dark:bg-gray-800 border-2 border-yellow-400 dark:border-yellow-500 text-gray-800 dark:text-gray-100 font-bold py-3 px-4 pr-8 rounded-xl leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 text-center text-lg shadow-sm">
+                        {% for m in lista_meses %}
+                            <option value="{{ m }}" {% if m == mes_atual %}selected{% endif %}>{{ m }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-yellow-500">
+                        <svg class="fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-xl font-bold mb-6 text-center text-gray-700 dark:text-gray-200">Escolha seu Treino</h2>
             
             <div class="flex flex-col gap-4">
                 {% for treino in treinos %}
-    
+                    <!-- A URL leva o "mes_atual" -->
                     {% if treino == 'Alongamento' %}
-                    <a href="/treino/{{ treino }}" class="block w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
+                    <a href="/treino/{{ mes_atual }}/{{ treino }}" class="block w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
                         🧘‍♂️ {{ treino }}
                     </a>
                     
                     {% elif treino == 'Preventivo' or treino == 'Mobilidade' %}
-                    <a href="/treino/{{ treino }}" class="block w-full bg-green-400 hover:bg-green-500 active:bg-green-600 dark:bg-green-500 dark:hover:bg-green-400 text-black dark:text-gray-900 font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
+                    <a href="/treino/{{ mes_atual }}/{{ treino }}" class="block w-full bg-green-400 hover:bg-green-500 active:bg-green-600 dark:bg-green-500 dark:hover:bg-green-400 text-black dark:text-gray-900 font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
                         🛡️ {{ treino }}
                     </a>
                     
                     {% else %}
-                    <a href="/treino/{{ treino }}" class="block w-full bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-400 text-black dark:text-gray-900 font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
+                    <a href="/treino/{{ mes_atual }}/{{ treino }}" class="block w-full bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-400 text-black dark:text-gray-900 font-bold text-lg py-5 px-6 rounded-2xl shadow text-center transition transform active:scale-95">
                         🏋️‍♂️ {{ treino }}
                     </a>
                     {% endif %}

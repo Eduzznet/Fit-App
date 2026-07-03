@@ -23,16 +23,20 @@
 
     <div class="max-w-md mx-auto bg-white dark:bg-gray-800 min-h-screen shadow-lg relative transition-colors duration-300">
         
-        <header class="bg-black text-white p-6 rounded-b-3xl shadow-md flex items-center justify-between relative border-b border-transparent dark:border-gray-700">
-            <a href="javascript:history.back()" class="text-yellow-400 font-bold text-sm bg-gray-800 dark:bg-gray-700 px-3 py-2 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition">
+        <header class="bg-black text-white p-5 rounded-b-3xl shadow-md flex items-center justify-between border-b border-transparent dark:border-gray-700">
+            
+            <a href="javascript:history.back()" class="flex-shrink-0 flex items-center justify-center text-yellow-400 font-bold text-sm bg-gray-800 dark:bg-gray-700 px-3 py-2 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition whitespace-nowrap">
                 ⬅ Voltar
             </a>
             
-            <button onclick="toggleTheme()" class="absolute top-5 right-4 bg-gray-800 hover:bg-gray-700 p-2 rounded-full shadow active:scale-95 transition text-lg">
+            <h1 class="flex-1 text-lg font-extrabold text-yellow-400 tracking-tight mx-3 text-center leading-snug">
+                {{ nome_treino }}
+            </h1>
+            
+            <button onclick="toggleTheme()" class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 w-10 h-10 rounded-full shadow active:scale-95 transition flex items-center justify-center text-lg">
                 🌓
             </button>
             
-            <h1 class="text-2xl font-extrabold text-yellow-400 tracking-tight truncate ml-4 mr-10">{{ nome_treino }}</h1>
         </header>
 
         <main class="p-4 mt-2">
@@ -209,14 +213,14 @@
         </main>
     </div>
 
-    <!-- MANTIVE O SCRIPT EXATAMENTE IGUAL AO SEU ORIGINAL -->
     <script>
         const nomeTreino = "{{ nome_treino }}"; 
+        const mesAtivo = "{{ mes }}"; 
         const botoes = document.querySelectorAll('.btn-exercicio');
 
         window.onload = function() {
             botoes.forEach(function(botao, index) {
-                let chave = `fitapp-${nomeTreino}-btn-${index}`;
+                let chave = `fitapp-${mesAtivo}-${nomeTreino}-btn-${index}`;
                 let salvas = localStorage.getItem(chave);
                 
                 if (salvas !== null) {
@@ -239,7 +243,7 @@
                 let b_idx = input.getAttribute('data-b');
                 let e_idx = input.getAttribute('data-e');
                 let tipo = input.getAttribute('data-tipo');
-                let chave = `fitapp-${nomeTreino}-${tipo}-${b_idx}-${e_idx}`;
+                let chave = `fitapp-${mesAtivo}-${nomeTreino}-${tipo}-${b_idx}-${e_idx}`;
                 
                 let textoSalvo = localStorage.getItem(chave);
                 if (textoSalvo !== null) {
@@ -254,7 +258,7 @@
             let b_idx = input.getAttribute('data-b');
             let e_idx = input.getAttribute('data-e');
             let tipo = input.getAttribute('data-tipo');
-            let chave = `fitapp-${nomeTreino}-${tipo}-${b_idx}-${e_idx}`;
+            let chave = `fitapp-${mesAtivo}-${nomeTreino}-${tipo}-${b_idx}-${e_idx}`;
             localStorage.setItem(chave, input.value);
         }
 
@@ -262,7 +266,7 @@
             let feitas = parseInt(botao.getAttribute('data-feitas'));
             let total = parseInt(botao.getAttribute('data-total'));
             let index = Array.from(botoes).indexOf(botao);
-            let chave = `fitapp-${nomeTreino}-btn-${index}`;
+            let chave = `fitapp-${mesAtivo}-${nomeTreino}-btn-${index}`;
 
             if (feitas < total) {
                 feitas++;
@@ -285,7 +289,7 @@
             let feitas = parseInt(botaoPrincipal.getAttribute('data-feitas'));
             let total = parseInt(botaoPrincipal.getAttribute('data-total'));
             let index = Array.from(botoes).indexOf(botaoPrincipal);
-            let chave = `fitapp-${nomeTreino}-btn-${index}`;
+            let chave = `fitapp-${mesAtivo}-${nomeTreino}-btn-${index}`;
 
             if (feitas > 0) {
                 feitas--;
@@ -318,7 +322,7 @@
 
         function resetarTreino() {
             botoes.forEach(function(botao, index) {
-                let chave = `fitapp-${nomeTreino}-btn-${index}`;
+                let chave = `fitapp-${mesAtivo}-${nomeTreino}-btn-${index}`;
                 localStorage.removeItem(chave); 
 
                 botao.setAttribute('data-feitas', '0');
